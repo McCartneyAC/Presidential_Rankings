@@ -23,8 +23,8 @@ ui <- fluidPage(
       
       selectInput("valueselect", "Select Value to Graph", 
                   choices = list(
-                    "Rating" = "inputrating",
-                    "Polarization Score \n (smaller is more polarized)" = "inputpolar"),
+                    "Rating" = "Rating",
+                    "Polarization Score (smaller is more polarized)" = "Polarization"),
                   selected = "inputrating"
                   ),
       
@@ -41,18 +41,17 @@ ui <- fluidPage(
       selectInput("colorselect", "Color by",
                     list(
                     "Political Party" = "Party", 
-                    "Home State" = "`Home State`"),
+                    "Home State" = "HomeState"),
                   selected = "Party"
                   ),
       
       selectInput("orderby", "Order Chart by",
                   choices = list(
-                    "Rank" = "inputorder_rank",
-                    "Rating" = "inputorder_rating",
-                    "Presidency" = "inputorder_presidency",
-                    "Polarization" = "inputorder_polarization"
+                    "Rating" = "Rating",
+                    "Presidency" = "Presidency",
+                    "Polarization" = "Polarization"
                   ),
-                  selected = "inputorder_presidency"
+                  selected = "Presidency"
                   )
       ),
                    
@@ -76,7 +75,6 @@ ui <- fluidPage(
                                                 to explore the data a bit more than is possible in news reports and other online articles,
                                                 and to see the data themselves via an interactive data table."),
                                          tags$p("Please enjoy!")
-                                         # tags$p("What if you don't have ciphertext? Try", tags$a(href="http://rot13.com/", "Rot13."),
                                          )
                                 ),
                        tabPanel("data dable",
@@ -103,6 +101,29 @@ server<-function(input, output){
   
   presidents<-readxl::read_xlsx("presidents.xlsx")
   
+  pal<-c("cornflowerblue",
+         "darkorchid4",
+         "goldenrod4",
+         "dimgray",
+         "firebrick",  # five
+         "darkolivegreen",
+         "slateblue",
+         "sienna4",
+         "coral1",
+         "green1", # ten
+         "palegreen4",
+         "khaki4",
+         "darkorchid",
+         "turquoise4",
+         "darkorange4", #fifteen
+         "aquamarine4",
+         "peru",
+         "grey15",
+         "cyan4",
+         "hotpink4" #twenty
+  )
+  
+  
   #map <- reactive({})
   #output$<-renderPlot({})
   #output$<-renderPlot({})
@@ -113,11 +134,13 @@ server<-function(input, output){
   
   
   output$plotid<-renderPlot({
-    
+    # current error: length(f) == length(x) is not TRUE
+    # need to fix plot so data length matches between ggplot() element and geom_col() element
+    # perhaps add multiple geom_col elements overtop of a base that is consistent? 
       ggplot(
         data=dplyr::filter(presidents, Year == input$yearselect), 
-          aes(x = factor(President, levels = President[order(presidents$Presidency)]), y = Rating, fill = Party))+
-      geom_col() + 
+        aes(x = fct_reorder(President, input$orderby))) +
+      geom_col(aes_string(y = input$valueselect, fill = input$colorselect)) + 
       coord_flip() + 
       scale_fill_manual(values=pal) + 
       labs(
@@ -143,10 +166,6 @@ shinyApp(ui, server)
 
 
 
-
-
-
-
 ##############################################################################################################
 # practice and set up
 
@@ -157,12 +176,8 @@ presidents<-readxl::read_xlsx("presidents.xlsx")
 datatable(presidents, rownames=F)
 presidents
 
-yr <- 2018
-clr <- presidents$Party
-plt <- presidents$Rating
 
 
-pal<-c("cornflowerblue","darkorchid4","goldenrod4","dimgray","firebrick","darkolivegreen")
 
 presidents %>%
   filter(Year == yr) %>%
@@ -177,14 +192,18 @@ presidents %>%
     caption = "Rottinghaus and Vaughn's Presidential Data"
   ) + 
   theme_hc()
-presidents
 
-shinyApp(
-  ui = fluidPage(DTOutput('tbl')),
-  server = function(input, output) {
 
-    output$tbl = renderDT(
-      presidents, options = list(lengthChange = FALSE,rownames=FALSE)
-    )
-  }
-)
+dplyr::filter(presidents, Year == 2014) %>%
+ggplot(
+  aes(x = fct_reorder(President, Presidency), y = presidents$Rating, fill = presidents$Party)) +
+  geom_col() + 
+  coord_flip() + 
+  scale_fill_manual(values=pal) + 
+  labs(
+    title="Rankings of U.S. Presidents",
+    x = "President",
+    y = "Rating",
+    caption = "Rottinghaus and Vaughn's Presidential Data"
+  ) + 
+  theme_hc()
