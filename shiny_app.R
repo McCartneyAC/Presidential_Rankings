@@ -131,7 +131,7 @@ server<-function(input, output){
   }
   
   
-  
+
   presidents<-readxl::read_xlsx("presidents.xlsx")
   
   pal<-c("cornflowerblue",
@@ -228,9 +228,9 @@ server<-function(input, output){
       geom_line(aes(color = Party, alpha = 1), size = 2) +
       geom_point(aes(color = Party, alpha = 1), size = 4) +
       scale_y_reverse(breaks = 1:44,expand = c(.05, .05))+
-      scale_x_continuous(breaks = 2014:2018, minor_breaks = 2014:2018) +
+      scale_x_continuous(breaks = 2014:2021, minor_breaks = 2014:2021) +
       geom_text(data = presidents %>% filter(Year == "2018"),
-                aes(label = President, x = 2018.5) ,  fontface = "bold", color = "#888888", size = 4) +
+                aes(label = President, x = 2019) ,  fontface = "bold", color = "#888888", size = 4, hjust="inward") +
       coord_cartesian(ylim = c(1,44)) + 
       my_theme()+ 
       scale_color_manual(values=pal)+
@@ -238,8 +238,6 @@ server<-function(input, output){
         title="How did Ratings Change over Four Years?"
       )
   })
-  
-  
   
   
 }
