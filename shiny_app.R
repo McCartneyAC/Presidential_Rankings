@@ -165,24 +165,7 @@ server<-function(input, output){
   )
   
   
-  output$plotid<-renderPlot({
-    # current error: length(f) == length(x) is not TRUE
-    # need to fix plot so data length matches between ggplot() element and geom_col() element
-    # perhaps add multiple geom_col elements overtop of a base that is consistent? 
-      ggplot(
-        data=dplyr::filter(presidents, Year == input$yearselect), 
-        aes(x = fct_reorder(President, input$orderby), y = input$valueselect, fill = input$colorselect)) +
-      geom_col() + 
-      coord_flip() + 
-      scale_fill_manual(values=pal) + 
-      labs(
-        title="Rankings of U.S. Presidents",
-        x = "President",
-        y = "Rating",
-        caption = "Rottinghaus and Vaughn's Presidential Data"
-        ) + 
-      theme_hc()
-    }, height = 850)
+
   
   output$plotid<-renderPlot({
     if (input$orderby == "Rating") {
